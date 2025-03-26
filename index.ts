@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 import {
 	existsSync,
 	mkdirSync,
@@ -248,9 +249,9 @@ const initStyling = (config: SkibdiProjectConfig) => {
 const initFrontendDirectory = async (config: SkibdiProjectConfig) => {
 	const { projectPath } = config;
 	const frontendDir = path.join(projectPath, "apps", "frontend");
-	const svelteInit = Bun.spawnSync({
-		cmd: [
-			"bunx",
+	const svelteInit = spawnSync(
+		"bunx",
+		[
 			"sv",
 			"create",
 			"--template",
@@ -261,11 +262,9 @@ const initFrontendDirectory = async (config: SkibdiProjectConfig) => {
 			"--no-install",
 			".",
 		],
-		cwd: frontendDir,
-		stdout: "pipe",
-		stderr: "pipe",
-	});
-	if (svelteInit.success === false) {
+		{ cwd: frontendDir, stdio: "pipe" },
+	);
+	if (svelteInit.error) {
 		throw new Error("Failed to initialize Svelte project");
 	}
 
@@ -477,11 +476,9 @@ if (installDeps === "yes") {
 	s.start("Installing dependencies");
 
 	const [, errInstallingDeps] = unwrapSync(() => {
-		Bun.spawnSync({
-			cmd: ["bun", "install", ...features],
+		spawnSync("bun", ["install", ...features], {
 			cwd: projectPath,
-			stdout: "pipe",
-			stderr: "pipe",
+			stdio: "pipe",
 		});
 	});
 	if (errInstallingDeps) {
