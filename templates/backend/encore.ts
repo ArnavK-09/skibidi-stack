@@ -8,4 +8,4 @@ export default {
         "dev": "bun run backend & bun run frontend",
         "boot": "bunx concurrently 'bun run backend' 'bun run frontend'",
       },
-} as SkibdiBackendConfig
+} satisfies SkibdiBackendConfig
