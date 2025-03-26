@@ -1,13 +1,10 @@
-import encoreBackendConfig from "./encore";
 import elysiaBackendConfig from "./elysia";
+import encoreBackendConfig from "./encore";
 
 export interface SkibdiBackendConfig {
-    scripts: {
-        [key: string]: string;
-    };
+	scripts: {
+		[key: string]: string;
+	};
 }
 
-export {
-     elysiaBackendConfig,
-     encoreBackendConfig
-} 
+export { elysiaBackendConfig, encoreBackendConfig };

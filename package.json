@@ -1,16 +1,24 @@
 {
-  "name": "skibdi-stack",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@arnavk-09/unwrap-go": "^0.1.1",
-    "@clack/core": "^0.4.1",
-    "@clack/prompts": "^0.10.0",
-    "@types/bun": "latest",
-    "eta": "^3.5.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+	"name": "skibdi-stack",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"devDependencies": {
+		"@arnavk-09/unwrap-go": "^0.1.1",
+		"@biomejs/biome": "1.9.4",
+		"@clack/core": "^0.4.1",
+		"@clack/prompts": "^0.10.0",
+		"@types/bun": "latest",
+		"eta": "^3.5.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"scripts": {
+		"fmt": "biome format --fix .",
+		"fmt:check": "biome format --check .",
+		"lint": "biome lint --unsafe --fix .",
+		"lint:check": "biome lint .",
+		"check": "biome check ."
+	}
 }
