@@ -1,10 +1,18 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+#!/usr/bin/env node
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	readdirSync,
+	writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { unwrapSync } from "@arnavk-09/unwrap-go";
 import {
 	cancel,
 	intro,
 	isCancel,
+	log,
 	multiselect,
 	note,
 	outro,
@@ -12,6 +20,7 @@ import {
 	spinner,
 	text,
 } from "@clack/prompts";
+import { Glob } from "bun";
 import { depVersions } from "./consts";
 import { elysiaBackendConfig, encoreBackendConfig } from "./templates/backend";
 
@@ -63,6 +72,47 @@ const writePackageJson = (
 	Bun.write(packageJsonPath, JSON.stringify(content, null, 2));
 };
 
+const copyDirTemplates = (from: string, to: string) => {
+	const packageRoot = path
+		.dirname(new URL(import.meta.url).pathname)
+		.replace(/^\/([A-Za-z]):/, "$1:");
+	const templateDir = path.join(packageRoot, from);
+
+	const readdirRecursive = (dir: string): string[] => {
+		if (!existsSync(dir)) {
+			throw new Error(`Template directory not found: ${dir}`);
+		}
+
+		const entries = readdirSync(dir, { withFileTypes: true });
+
+		return entries.reduce<string[]>((files, entry) => {
+			const fullPath = path.join(dir, entry.name);
+			if (entry.isDirectory()) {
+				return [...files, ...readdirRecursive(fullPath)];
+			}
+			if (entry.isFile() && entry.name.endsWith(".eta")) {
+				return [...files, fullPath];
+			}
+			return files;
+		}, []);
+	};
+
+	const files = readdirRecursive(templateDir);
+
+	for (const sourcePath of files) {
+		const relativePath = path.relative(templateDir, sourcePath);
+		const destPath = path.join(to, relativePath.replace(".eta", ""));
+
+		const destDir = path.dirname(destPath);
+		if (!existsSync(destDir)) {
+			mkdirSync(destDir, { recursive: true });
+		}
+
+		const content = readFileSync(sourcePath, "utf-8");
+		writeFileSync(destPath, content);
+	}
+};
+
 const initPrettier = (config: SkibdiProjectConfig) => {
 	const { projectPath } = config;
 	const prettierConfigPath = path.join(projectPath, ".prettierrc");
@@ -93,7 +143,9 @@ const initPrettier = (config: SkibdiProjectConfig) => {
 	};
 	writePackageJson(packageJson, config);
 };
-
+const initEslint = (config: SkibdiProjectConfig) => {
+	log.warn("ESLint not implemented yet");
+};
 const initPackageJson = ({
 	projectName,
 	projectPath,
@@ -127,9 +179,12 @@ const initPackageJson = ({
 		JSON.stringify(packageJson, null, 2),
 	);
 };
-
 const initGhActions = (config: SkibdiProjectConfig) => {
 	const { projectPath } = config;
+	const packageRoot = path
+		.dirname(new URL(import.meta.url).pathname)
+		.replace(/^\/([A-Za-z]):/, "$1:");
+	const templateDir = path.join(packageRoot, "templates/gh-actions");
 	const ghActionsDir = path.join(projectPath, ".github");
 	const workflowsDir = path.join(ghActionsDir, "workflows");
 
@@ -140,20 +195,24 @@ const initGhActions = (config: SkibdiProjectConfig) => {
 		mkdirSync(workflowsDir, { recursive: true });
 	}
 
-	const frontendBuildYml = Bun.file(
-		"./templates/gh-actions/frontend-build.yml",
-	);
-	Bun.write(
-		path.join(workflowsDir, "frontend-build.yml"),
-		frontendBuildYml.toString(),
-	);
+	if (!existsSync(templateDir)) {
+		throw new Error(`Template directory not found: ${templateDir}`);
+	}
 
-	if (config.features.includes("prettier")) {
-		const formatCheckYml = Bun.file("./templates/gh-actions/format-check.yml");
-		Bun.write(
-			path.join(workflowsDir, "format-check.yml"),
-			formatCheckYml.toString(),
-		);
+	const entries = readdirSync(templateDir, { withFileTypes: true });
+	for (const entry of entries) {
+		if (entry.isFile()) {
+			const sourcePath = path.join(templateDir, entry.name);
+			if (
+				entry.name === "format-check.yml" &&
+				!config.features.includes("prettier")
+			) {
+				continue;
+			}
+			const destPath = path.join(workflowsDir, entry.name);
+			const content = readFileSync(sourcePath, "utf-8");
+			writeFileSync(destPath, content);
+		}
 	}
 };
 
@@ -165,6 +224,9 @@ const initFeatures = (config: SkibdiProjectConfig) => {
 	if (features.includes("gh-actions")) {
 		initGhActions(config);
 	}
+	if (features.includes("eslint")) {
+		initEslint(config);
+	}
 };
 
 const initDirectories = (config: SkibdiProjectConfig) => {
@@ -175,10 +237,53 @@ const initDirectories = (config: SkibdiProjectConfig) => {
 
 	mkdirSync(appsDir, { recursive: true });
 	mkdirSync(frontendDir, { recursive: true });
-	mkdirSync(backendDir, { recursive: true });
+	if (config.backend !== "none") {
+		mkdirSync(backendDir, { recursive: true });
+	}
 };
 
-const initStyling = (config: SkibdiProjectConfig) => {};
+const initStyling = (config: SkibdiProjectConfig) => {
+	log.warn("Styling not implemented yet");
+};
+const initFrontendDirectory = async (config: SkibdiProjectConfig) => {
+	const { projectPath } = config;
+	const frontendDir = path.join(projectPath, "apps", "frontend");
+	const svelteInit = Bun.spawnSync({
+		cmd: [
+			"bunx",
+			"sv",
+			"create",
+			"--template",
+			"minimal",
+			"--types",
+			"ts",
+			"--no-add-ons",
+			"--no-install",
+			".",
+		],
+		cwd: frontendDir,
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	if (svelteInit.success === false) {
+		throw new Error("Failed to initialize Svelte project");
+	}
+
+	if (config.backend === "elysia") {
+		const [, errCopyingElysia] = unwrapSync(() =>
+			copyDirTemplates("./templates/frontend/with-elysia", frontendDir),
+		);
+		if (errCopyingElysia) {
+			cancel(`Failed to copy Elysia templates:- ${errCopyingElysia.message}`);
+		}
+	}
+};
+
+const initbackendDirectory = (config: SkibdiProjectConfig) => {
+	const { projectPath, backend } = config;
+	const backendDir = path.join(projectPath, "apps", "backend");
+};
+
 const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 	const [, errInitingDirectories] = unwrapSync(() => initDirectories(config));
 	if (errInitingDirectories) {
@@ -198,7 +303,23 @@ const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 	if (errInitingFeatures) {
 		cancel(`Failed to initiate features:- ${errInitingFeatures.message}`);
 	}
+	const [, errInitingFrontend] = unwrapSync(() =>
+		initFrontendDirectory(config),
+	);
+	if (errInitingFrontend) {
+		cancel(
+			`Failed to initiate frontend directory:- ${errInitingFrontend.message}`,
+		);
+		process.exit(1);
+	}
 
+	const [, errInitingBackend] = unwrapSync(() => initbackendDirectory(config));
+	if (errInitingBackend) {
+		cancel(
+			`Failed to initiate backend directory:- ${errInitingBackend.message}`,
+		);
+		process.exit(1);
+	}
 	const [, errInitingStyling] = unwrapSync(() => initStyling(config));
 	if (errInitingStyling) {
 		cancel(`Failed to initiate styling:- ${errInitingStyling.message}`);

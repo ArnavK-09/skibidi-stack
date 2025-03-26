@@ -1,0 +1,17 @@
+// Import treaty client builder from Elysia Eden
+import { treaty } from "@elysiajs/eden";
+// Import app type definition from server routes
+import { app } from "backend/src";
+
+// Determine API origin based on environment
+// Use window.location.origin in browser, empty string in SSR
+const origin = typeof window !== "undefined" ? window.location.origin : "";
+
+// Create typed API client instance using treaty
+export const client = treaty<typeof app>(origin);
+
+// Extract API methods from client
+const api = client.api;
+
+// Export API methods as default
+export default api;

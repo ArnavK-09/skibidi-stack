@@ -11,7 +11,9 @@
 			"TESTING-HERE.md",
 			"**/node_modules/**",
 			"**/dist/**",
-			"**/build/**"
+			"**/build/**",
+			"templates/frontend/**",
+			"*.js"
 		]
 	},
 	"formatter": {
@@ -30,6 +32,9 @@
 			},
 			"complexity": {
 				"useLiteralKeys": "off"
+			},
+			"performance": {
+				"noAccumulatingSpread": "off"
 			}
 		}
 	},

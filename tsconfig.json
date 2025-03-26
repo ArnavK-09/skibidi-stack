@@ -1,4 +1,5 @@
 {
+	"exclude": ["templates", "TESTING-HERE"],
 	"compilerOptions": {
 		// Environment setup & latest features
 		"lib": ["esnext"],

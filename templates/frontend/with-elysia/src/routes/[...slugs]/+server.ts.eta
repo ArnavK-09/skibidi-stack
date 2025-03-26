@@ -1,0 +1,10 @@
+// Import Elysia framework from backend
+import { app } from "backend/src";
+
+// Type definition for request handler functions
+type RequestHandler = (v: { request: Request }) => Response | Promise<Response>;
+
+// Export GET request handler that processes incoming GET requests
+export const GET: RequestHandler = ({ request }) => app.handle(request);
+// Export POST request handler that processes incoming POST requests
+export const POST: RequestHandler = ({ request }) => app.handle(request);
