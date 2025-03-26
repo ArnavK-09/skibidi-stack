@@ -27,3 +27,6 @@ jobs:
 
       - name: Check linting
         run: bun run lint:check
+
+      - name: Check quality
+        run: bun run check

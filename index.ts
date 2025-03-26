@@ -1,20 +1,19 @@
-import {
-	intro,
-	outro,
-	text,
-	select,
-	multiselect,
-	spinner,
-	isCancel,
-	cancel,
-	note,
-} from "@clack/prompts";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { unwrapPromise, unwrapSync } from "@arnavk-09/unwrap-go";
 import path from "node:path";
-
-import { encoreBackendConfig, elysiaBackendConfig } from "./templates/backend";
+import { unwrapSync } from "@arnavk-09/unwrap-go";
+import {
+	cancel,
+	intro,
+	isCancel,
+	multiselect,
+	note,
+	outro,
+	select,
+	spinner,
+	text,
+} from "@clack/prompts";
 import { depVersions } from "./consts";
+import { elysiaBackendConfig, encoreBackendConfig } from "./templates/backend";
 
 interface SkibdiProjectConfig {
 	projectName: string;
@@ -198,13 +197,11 @@ const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 	const [, errInitingFeatures] = unwrapSync(() => initFeatures(config));
 	if (errInitingFeatures) {
 		cancel(`Failed to initiate features:- ${errInitingFeatures.message}`);
-		process.exit(1);
 	}
 
 	const [, errInitingStyling] = unwrapSync(() => initStyling(config));
 	if (errInitingStyling) {
 		cancel(`Failed to initiate styling:- ${errInitingStyling.message}`);
-		process.exit(1);
 	}
 };
 
@@ -359,18 +356,17 @@ if (installDeps === "yes") {
 	s.start("Installing dependencies");
 
 	const [, errInstallingDeps] = unwrapSync(() => {
-		const proc = Bun.spawn(["bun", "install", ...features], {
+		Bun.spawnSync({
+			cmd: ["bun", "install", ...features],
 			cwd: projectPath,
 			stdout: "pipe",
 			stderr: "pipe",
 		});
-		if (proc.stderr) {
-			throw new Error(proc.stderr.toString());
-		}
 	});
 	if (errInstallingDeps) {
-		cancel(`Failed to install dependencies:- ${errInstallingDeps.message}`);
-		process.exit(1);
+		cancel(
+			"Failed to install dependencies. Please try installing them manually with 'bun install'",
+		);
 	}
 	s.stop("Dependencies installed successfully");
 }
