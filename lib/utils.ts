@@ -11,7 +11,6 @@ import {
 import { dirname, join, relative } from "node:path";
 import { unwrapSync } from "@arnavk-09/unwrap-go";
 import { depVersions } from "@lib/consts";
-import handlerbars from "handlebars";
 
 /**
  * Gets the version of a dependency from the depVersions object
@@ -51,7 +50,7 @@ export const writePackageJson = (
 ) => {
 	const { projectPath } = config;
 	const packageJsonPath = join(projectPath, "package.json");
-	Bun.write(packageJsonPath, JSON.stringify(content, null, 2));
+	writeFileSync(packageJsonPath, JSON.stringify(content, null, 2));
 };
 
 /**
@@ -60,7 +59,7 @@ export const writePackageJson = (
 export const copyDirTemplates = (
 	templateDir: string,
 	to: string,
-	data: unknown = {},
+	data = {},
 ) => {
 	const readdirRecursive = (dir: string): string[] => {
 		if (!existsSync(dir)) {
@@ -92,10 +91,17 @@ export const copyDirTemplates = (
 			mkdirSync(destDir, { recursive: true });
 		}
 
-		const compiledTemplate = handlerbars.compile(
-			readFileSync(sourcePath, "utf-8"),
-		);
-		const content = compiledTemplate(data);
+		const templateReplacer = (
+			template: string,
+			data: Record<string, unknown>,
+		) => {
+			return template.replace(/\{\{([^}]+)\}\}/g, (match, key): string => {
+				const trimmedKey = key.trim();
+				return `${data[trimmedKey] !== undefined ? data[trimmedKey] : match}`;
+			});
+		};
+
+		const content = templateReplacer(readFileSync(sourcePath, "utf-8"), data);
 		writeFileSync(destPath, content);
 	}
 };

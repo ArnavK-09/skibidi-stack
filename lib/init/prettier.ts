@@ -1,3 +1,4 @@
+import { writeFileSync } from "node:fs";
 /**
  * IMPORTS
  */
@@ -10,7 +11,7 @@ import { fetchPackageJson, getDepVersion, writePackageJson } from "@lib/utils";
 const initPrettier = (config: SkibidiProjectConfig) => {
 	const { projectPath } = config;
 	const prettierConfigPath = join(projectPath, ".prettierrc");
-	Bun.write(
+	writeFileSync(
 		prettierConfigPath,
 		JSON.stringify(
 			{

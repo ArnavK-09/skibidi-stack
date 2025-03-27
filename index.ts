@@ -29,7 +29,6 @@ import {
 } from "@lib/init";
 import initbackendDirectory from "@lib/init/backend";
 import { getRelativePath } from "@lib/utils";
-import figlet from "figlet";
 import kleur from "kleur";
 
 // Utility functions
@@ -93,11 +92,16 @@ const initBasicSetupForProject = (config: SkibidiProjectConfig) => {
 console.clear();
 intro(
 	`\n${kleur.cyan(
-		figlet.textSync("Skibidi Stack", {
-			font: "Small",
-			horizontalLayout: "fitted",
-			verticalLayout: "fitted",
-		}),
+		`
+   ▄▄▄▄▄   █  █▀ ▄█ ███   ▄█ ██▄   ▄█ 
+  █     ▀▄ █▄█   ██ █  █  ██ █  █  ██ 
+▄  ▀▀▀▀▄   █▀▄   ██ █ ▀ ▄ ██ █   █ ██ 
+ ▀▄▄▄▄▀    █  █  ▐█ █  ▄▀ ▐█ █  █  ▐█ 
+             █    ▐ ███    ▐ ███▀   ▐ 
+            ▀                         
+                 							
+
+`.trimEnd(),
 	)}`,
 );
 
