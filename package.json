@@ -11,6 +11,7 @@
 		"@clack/prompts": "^0.10.0",
 		"@types/bun": "latest",
 		"eta": "^3.5.0",
+		"figlet": "^1.8.0",
 		"tsdot": "^1.1.7",
 		"tsup": "^8.4.0"
 	},
@@ -25,5 +26,8 @@
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
 		"build": "bun scripts/build-cli.ts"
+	},
+	"dependencies": {
+		"@types/figlet": "^1.7.0"
 	}
 }

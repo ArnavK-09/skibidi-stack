@@ -1,0 +1,23 @@
+// Import the Elysia framework
+import { Elysia } from "elysia";
+
+// Create a new Elysia app instance with API prefix
+export const app = new Elysia({ prefix: "/api" })
+  .get("/", () => "Hello Elysia")
+  .get("/hello/:name", ({ params: { name } }) => {
+    const msg = `Hello ${name}!`;
+    return { message: msg };
+  });
+
+// Export the type of the app for type safety
+export const App = typeof app;
+
+// Start the server if this is the main module
+if (import.meta.main) {
+  // Listen on port 3000
+  app.listen(3000);
+  // Log server startup information
+  console.log(
+    `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+  );
+}

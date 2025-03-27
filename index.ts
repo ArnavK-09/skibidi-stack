@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
 	existsSync,
 	mkdirSync,
@@ -21,9 +21,9 @@ import {
 	spinner,
 	text,
 } from "@clack/prompts";
-import { Glob } from "bun";
-import { depVersions } from "./consts";
-import { elysiaBackendConfig, encoreBackendConfig } from "./templates/backend";
+import figlet from "figlet";
+import { elysiaBackendConfig, encoreBackendConfig } from "./configs";
+import { getDepVersion } from "./lib/utils";
 
 interface SkibdiProjectConfig {
 	projectName: string;
@@ -47,9 +47,6 @@ interface PackageJson {
 
 console.clear();
 
-const getDepVersion = (depName: string) => {
-	return depVersions[depName] || "latest";
-};
 const getRelativePath = (fullPath: string): string => {
 	const [, err] = unwrapSync(() =>
 		fullPath.split(process.cwd())[1]?.substring(1),
@@ -166,13 +163,13 @@ const initPackageJson = ({
 	if (backend === "encore") {
 		packageJson.scripts = {
 			...packageJson.scripts,
-			...encoreBackendConfig.scripts,
+			...encoreBackendConfig.monorepo_scripts,
 		};
 	}
 	if (backend === "elysia") {
 		packageJson.scripts = {
 			...packageJson.scripts,
-			...elysiaBackendConfig.scripts,
+			...elysiaBackendConfig.monorepo_scripts,
 		};
 	}
 	writeFileSync(
@@ -246,12 +243,17 @@ const initDirectories = (config: SkibdiProjectConfig) => {
 const initStyling = (config: SkibdiProjectConfig) => {
 	log.warn("Styling not implemented yet");
 };
-const initFrontendDirectory = async (config: SkibdiProjectConfig) => {
+const initFrontendDirectory = (config: SkibdiProjectConfig) => {
 	const { projectPath } = config;
 	const frontendDir = path.join(projectPath, "apps", "frontend");
+
+	const s = spinner();
+	s.start("Initializing Svelte project");
+
 	const svelteInit = spawnSync(
-		"bunx",
+		"npx",
 		[
+			"--yes",
 			"sv",
 			"create",
 			"--template",
@@ -264,23 +266,70 @@ const initFrontendDirectory = async (config: SkibdiProjectConfig) => {
 		],
 		{ cwd: frontendDir, stdio: "pipe" },
 	);
+
 	if (svelteInit.error) {
+		s.stop("Failed to initialize Svelte project");
 		throw new Error("Failed to initialize Svelte project");
 	}
 
+	s.stop("Svelte project initialized successfully");
+
 	if (config.backend === "elysia") {
-		const [, errCopyingElysia] = unwrapSync(() =>
-			copyDirTemplates("./templates/frontend/with-elysia", frontendDir),
-		);
+		const [, errCopyingElysia] = unwrapSync(() => {
+			const frontendPackageJsonPath = path.join(frontendDir, "package.json");
+			const frontendPackageJson = JSON.parse(
+				readFileSync(frontendPackageJsonPath, "utf-8"),
+			);
+
+			frontendPackageJson.dependencies = {
+				...frontendPackageJson.dependencies,
+				...elysiaBackendConfig.backend.dependencies,
+			};
+
+			writeFileSync(
+				frontendPackageJsonPath,
+				JSON.stringify(frontendPackageJson, null, 2),
+			);
+			copyDirTemplates("./templates/frontend/with-elysia", frontendDir);
+		});
 		if (errCopyingElysia) {
-			cancel(`Failed to copy Elysia templates:- ${errCopyingElysia.message}`);
+			log.error(
+				`Failed to copy Elysia templates:- ${errCopyingElysia.message}`,
+			);
 		}
+		log.info("Elysia frontend templates copied successfully");
 	}
 };
 
 const initbackendDirectory = (config: SkibdiProjectConfig) => {
 	const { projectPath, backend } = config;
 	const backendDir = path.join(projectPath, "apps", "backend");
+
+	if (backend === "elysia") {
+		copyDirTemplates("./templates/backend/with-elysia", backendDir);
+		const backendPackageJsonPath = path.join(backendDir, "package.json");
+		const backendPackageJson = JSON.parse(
+			readFileSync(backendPackageJsonPath, "utf-8"),
+		);
+
+		backendPackageJson.name = "backend";
+
+		backendPackageJson.dependencies = {
+			...backendPackageJson.dependencies,
+			...elysiaBackendConfig.dependencies,
+		};
+
+		backendPackageJson.scripts = {
+			...backendPackageJson.scripts,
+			...elysiaBackendConfig.scripts,
+		};
+
+		writeFileSync(
+			backendPackageJsonPath,
+			JSON.stringify(backendPackageJson, null, 2),
+		);
+		log.info("Elysia backend templates copied successfully");
+	}
 };
 
 const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
@@ -325,7 +374,13 @@ const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 	}
 };
 
-intro("🚀 Skibdi Stack 🚀");
+intro(
+	`\n${figlet.textSync("Skibdi Stack", {
+		font: "Standard",
+		horizontalLayout: "fitted",
+		verticalLayout: "fitted",
+	})}`,
+);
 
 const projectName = await text({
 	message: "What is your project name?",
