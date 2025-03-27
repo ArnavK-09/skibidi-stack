@@ -21,7 +21,7 @@
 		"lint:check": "biome lint .",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"build": "bun build --target bun --entrypoints ./index.ts --outdir ./dist  --packages bundle && npx cpx \"templates/**/*.eta\" dist/templates",
+		"build": "bun build --target bun --entrypoints ./index.ts --outdir ./dist  --packages bundle && cpx \"templates/**/*.eta\" dist/templates",
 		"pre": "bun run fmt && bun run lint && bun run check:fix"
 	},
 	"dependencies": {
