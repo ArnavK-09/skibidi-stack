@@ -36,7 +36,7 @@ export const getRelativePath = (fullPath: string): string => {
  */
 export const fetchPackageJson = ({
 	projectPath,
-}: SkibdiProjectConfig): PackageJson => {
+}: SkibidiProjectConfig): PackageJson => {
 	const packageJsonPath = join(projectPath, "package.json");
 	const packageJsonContent = readFileSync(packageJsonPath, "utf-8");
 	return JSON.parse(packageJsonContent);
@@ -47,7 +47,7 @@ export const fetchPackageJson = ({
  */
 export const writePackageJson = (
 	content: PackageJson,
-	config: SkibdiProjectConfig,
+	config: SkibidiProjectConfig,
 ) => {
 	const { projectPath } = config;
 	const packageJsonPath = join(projectPath, "package.json");

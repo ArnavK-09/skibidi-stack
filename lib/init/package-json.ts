@@ -6,13 +6,13 @@ import { join } from "node:path";
 import { elysiaBackendConfig, encoreBackendConfig } from "@configs";
 
 /**
- * Initializes a package.json file for a Skibdi project
+ * Initializes a package.json file for a Skibidi project
  */
 const initPackageJson = ({
 	projectName,
 	projectPath,
 	backend,
-}: SkibdiProjectConfig) => {
+}: SkibidiProjectConfig) => {
 	const packageJson: PackageJson = {
 		name: projectName,
 		version: "1.0.0",

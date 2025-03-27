@@ -1,6 +1,6 @@
 import { log } from "@clack/prompts";
 
-const initEslint = (config: SkibdiProjectConfig) => {
+const initEslint = (config: SkibidiProjectConfig) => {
 	log.warn("ESLint not implemented yet");
 };
 

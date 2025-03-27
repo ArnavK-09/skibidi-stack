@@ -1,1 +1,1 @@
-# skibdi-stack
+# skibidi-stack

@@ -5,9 +5,9 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Initializes the directory structure for a Skibdi project
+ * Initializes the directory structure for a Skibidi project
  */
-const initDirectories = (config: SkibdiProjectConfig) => {
+const initDirectories = (config: SkibidiProjectConfig) => {
 	const { projectPath } = config;
 	const appsDir = join(projectPath, "apps");
 	const frontendDir = join(appsDir, "frontend");

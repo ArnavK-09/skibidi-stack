@@ -12,9 +12,9 @@ import { join } from "node:path";
 import { getTemplatesPath } from "@/";
 
 /**
- * Initializes GitHub Actions configuration for a Skibdi project
+ * Initializes GitHub Actions configuration for a Skibidi project
  */
-const initGithubActions = (config: SkibdiProjectConfig) => {
+const initGithubActions = (config: SkibidiProjectConfig) => {
 	const { projectPath } = config;
 	const templateDir = getTemplatesPath("gh-actions");
 	const ghActionsDir = join(projectPath, ".github");

@@ -1,4 +1,4 @@
-import type { SkibdiBackendConfig } from ".";
+import type { SkibidiBackendConfig } from ".";
 import { getDepVersion } from "../lib/utils";
 
 export default {
@@ -20,4 +20,4 @@ export default {
 		},
 	},
 	scripts: {},
-} satisfies SkibdiBackendConfig;
+} satisfies SkibidiBackendConfig;

@@ -12,7 +12,7 @@ import { copyDirTemplates } from "@lib/utils";
 /**
  * Initializes a new Svelte frontend project directory with specific backend configurations
  */
-const initFrontendDirectory = (config: SkibdiProjectConfig) => {
+const initFrontendDirectory = (config: SkibidiProjectConfig) => {
 	const { projectPath } = config;
 	const frontendDir = join(projectPath, "apps", "frontend");
 

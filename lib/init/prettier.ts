@@ -5,9 +5,9 @@ import { join } from "node:path";
 import { fetchPackageJson, getDepVersion, writePackageJson } from "@lib/utils";
 
 /**
- * Initializes Prettier configuration for a Skibdi project
+ * Initializes Prettier configuration for a Skibidi project
  */
-const initPrettier = (config: SkibdiProjectConfig) => {
+const initPrettier = (config: SkibidiProjectConfig) => {
 	const { projectPath } = config;
 	const prettierConfigPath = join(projectPath, ".prettierrc");
 	Bun.write(

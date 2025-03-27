@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+
+/**
+ * IMPORTS
+ */
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -7,7 +11,6 @@ import {
 	cancel,
 	intro,
 	isCancel,
-	log,
 	multiselect,
 	note,
 	outro,
@@ -29,6 +32,7 @@ import { getRelativePath } from "@lib/utils";
 import figlet from "figlet";
 import kleur from "kleur";
 
+// Utility functions
 export const getTemplatesPath = (route = ".") => {
 	const packageRoot = dirname(new URL(import.meta.url).pathname).replace(
 		/^\/([A-Za-z]):/,
@@ -37,22 +41,15 @@ export const getTemplatesPath = (route = ".") => {
 	return join(packageRoot, "templates", route);
 };
 
-console.clear();
-
-const initFeatures = (config: SkibdiProjectConfig) => {
+// Project initialization functions
+const initFeatures = (config: SkibidiProjectConfig) => {
 	const { features } = config;
-	if (features.includes("prettier")) {
-		initPrettier(config);
-	}
-	if (features.includes("gh-actions")) {
-		initGithubActions(config);
-	}
-	if (features.includes("eslint")) {
-		initEslint(config);
-	}
+	if (features.includes("prettier")) initPrettier(config);
+	if (features.includes("gh-actions")) initGithubActions(config);
+	if (features.includes("eslint")) initEslint(config);
 };
 
-const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
+const initBasicSetupForProject = (config: SkibidiProjectConfig) => {
 	const [, errInitingDirectories] = unwrapSync(() => initDirectories(config));
 	if (errInitingDirectories) {
 		cancel(`Failed to initiate project:- ${errInitingDirectories.message}`);
@@ -71,6 +68,7 @@ const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 	if (errInitingFeatures) {
 		cancel(`Failed to initiate features:- ${errInitingFeatures.message}`);
 	}
+
 	const [, errInitingFrontend] = unwrapSync(() => initFrontend(config));
 	if (errInitingFrontend) {
 		cancel(
@@ -84,15 +82,18 @@ const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 			`Failed to initiate backend directory:- ${errInitingBackend.message}`,
 		);
 	}
+
 	const [, errInitingStyling] = unwrapSync(() => initStyling(config));
 	if (errInitingStyling) {
 		cancel(`Failed to initiate styling:- ${errInitingStyling.message}`);
 	}
 };
 
+// Clear console and show intro
+console.clear();
 intro(
 	`\n${kleur.cyan(
-		figlet.textSync("Skibdi Stack", {
+		figlet.textSync("Skibidi Stack", {
 			font: "Small",
 			horizontalLayout: "fitted",
 			verticalLayout: "fitted",
@@ -100,10 +101,11 @@ intro(
 	)}`,
 );
 
+// Project configuration prompts
 const projectName = await text({
 	message: "What is your project name?",
-	placeholder: "my-skibdi-app",
-	defaultValue: "my-skibdi-app",
+	placeholder: "my-skibidi-app",
+	defaultValue: "my-skibidi-app",
 	validate(value) {
 		if (value.includes(" ")) return "Project name cannot contain spaces!";
 
@@ -114,7 +116,6 @@ const projectName = await text({
 		if (value.startsWith(".") || value.endsWith(".") || value.endsWith(" ")) {
 			return "Project name cannot start or end with dots or spaces!";
 		}
-
 		return;
 	},
 });
@@ -123,6 +124,7 @@ if (isCancel(projectName)) {
 	cancel("Operation cancelled");
 	process.exit(0);
 }
+
 const randomNo = Math.floor(Math.random() * 1000);
 const userSelectedProjectPath = await text({
 	message: "Where would you like to create your project?",
@@ -137,18 +139,19 @@ const userSelectedProjectPath = await text({
 		return;
 	},
 });
+
 if (isCancel(userSelectedProjectPath)) {
 	cancel("Operation cancelled");
 	process.exit(0);
 }
+
 const projectPath = join(process.cwd(), userSelectedProjectPath);
+
+// Framework selection prompts
 const backend = await select({
 	message: "Select your backend framework:",
 	options: [
-		{
-			value: "elysia",
-			label: "Elysia - Fast and flexible Bun web framework",
-		},
+		{ value: "elysia", label: "Elysia - Fast and flexible Bun web framework" },
 		{
 			value: "encore",
 			label: "Encore - Development platform for building backends",
@@ -192,7 +195,8 @@ if (isCancel(features)) {
 	process.exit(0);
 }
 
-const projectConfig: SkibdiProjectConfig = {
+// Project setup and initialization
+const projectConfig: SkibidiProjectConfig = {
 	projectName,
 	projectPath,
 	backend,
@@ -210,6 +214,7 @@ if (errorSettingProject) {
 	process.exit(1);
 }
 
+// Dependencies installation prompt
 const installDeps = await select({
 	message: "Would you like to install dependencies now?",
 	initialValue: "no",
@@ -223,6 +228,8 @@ if (isCancel(installDeps)) {
 	cancel("Operation cancelled");
 	process.exit(0);
 }
+
+// Project summary
 note(`
 📦 Project: ${projectName}
 📍 Location: ${getRelativePath(projectPath)}
@@ -231,6 +238,7 @@ note(`
 ✨ Features: ${features?.join(", ") || "none"}
 `);
 
+// Project creation and dependency installation
 const s = spinner();
 s.start("Creating project directory");
 
@@ -261,6 +269,7 @@ if (installDeps === "yes") {
 	s.stop("Dependencies installed successfully");
 }
 
+// Final instructions
 outro(
 	`\n🎉 Your project is ready! Next steps:
     1. cd ${getRelativePath(projectPath)}

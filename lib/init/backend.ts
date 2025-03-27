@@ -11,7 +11,7 @@ import { copyDirTemplates } from "@lib/utils";
 /**
  * Initializes the backend directory based on the provided configuration
  */
-const initbackendDirectory = (config: SkibdiProjectConfig) => {
+const initbackendDirectory = (config: SkibidiProjectConfig) => {
 	const { projectPath, backend } = config;
 	const backendDir = join(projectPath, "apps", "backend");
 

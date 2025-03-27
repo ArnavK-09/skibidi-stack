@@ -1,7 +1,7 @@
 /**
- * Configuration interface for Skibdi project settings
+ * Configuration interface for Skibidi project settings
  */
-interface SkibdiProjectConfig {
+interface SkibidiProjectConfig {
 	projectName: string;
 	projectPath: string;
 	backend: "elysia" | "encore" | "none";

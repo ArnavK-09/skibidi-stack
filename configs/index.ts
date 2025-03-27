@@ -1,7 +1,7 @@
 import elysiaBackendConfig from "./elysia";
 import encoreBackendConfig from "./encore";
 
-export interface SkibdiBackendConfig {
+export interface SkibidiBackendConfig {
 	// scripts to add in monorepo config
 	monorepo_scripts: {
 		[key: string]: string;

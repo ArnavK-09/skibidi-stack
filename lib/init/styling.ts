@@ -1,6 +1,6 @@
 import { log } from "@clack/prompts";
 
-const initStyling = (config: SkibdiProjectConfig) => {
+const initStyling = (config: SkibidiProjectConfig) => {
 	log.warn("Styling not implemented yet");
 };
 
