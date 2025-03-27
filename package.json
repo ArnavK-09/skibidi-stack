@@ -3,7 +3,6 @@
 	"module": "index.ts",
 	"type": "module",
 	"author": "ArnavK-09 <arnavkaushal09@gmail.com>",
-	"private": true,
 	"devDependencies": {
 		"@arnavk-09/unwrap-go": "^0.1.1",
 		"@biomejs/biome": "1.9.4",
