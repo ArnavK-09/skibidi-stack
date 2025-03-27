@@ -1,4 +1,5 @@
 import type { SkibdiBackendConfig } from ".";
+import { getDepVersion } from "../lib/utils";
 
 export default {
 	monorepo_scripts: {
@@ -10,4 +11,13 @@ export default {
 		dev: "bun run backend & bun run frontend",
 		boot: "bunx concurrently 'bun run backend' 'bun run frontend'",
 	},
+	dependencies: {
+		"encore.dev": getDepVersion("encore.dev"),
+	},
+	frontend: {
+		dependencies: {
+			backend: "workspace:*",
+		},
+	},
+	scripts: {},
 } satisfies SkibdiBackendConfig;

@@ -11,7 +11,7 @@ export default {
 	dependencies: {
 		elysia: getDepVersion("elysia"),
 	},
-	backend: {
+	frontend: {
 		dependencies: {
 			"@elysiajs/eden": getDepVersion("@elysiajs/eden"),
 			backend: "workspace:*",

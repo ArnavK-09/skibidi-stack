@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import {
 	existsSync,
 	mkdirSync,
@@ -22,6 +22,8 @@ import {
 	text,
 } from "@clack/prompts";
 import figlet from "figlet";
+import handlerbars from "handlebars";
+import kleur from "kleur";
 import { elysiaBackendConfig, encoreBackendConfig } from "./configs";
 import { getDepVersion } from "./lib/utils";
 
@@ -70,7 +72,7 @@ const writePackageJson = (
 	Bun.write(packageJsonPath, JSON.stringify(content, null, 2));
 };
 
-const copyDirTemplates = (from: string, to: string) => {
+const copyDirTemplates = (from: string, to: string, data: unknown = {}) => {
 	const packageRoot = path
 		.dirname(new URL(import.meta.url).pathname)
 		.replace(/^\/([A-Za-z]):/, "$1:");
@@ -105,8 +107,10 @@ const copyDirTemplates = (from: string, to: string) => {
 		if (!existsSync(destDir)) {
 			mkdirSync(destDir, { recursive: true });
 		}
-
-		const content = readFileSync(sourcePath, "utf-8");
+		const compiledTemplate = handlerbars.compile(
+			readFileSync(sourcePath, "utf-8"),
+		);
+		const content = compiledTemplate(data);
 		writeFileSync(destPath, content);
 	}
 };
@@ -283,14 +287,39 @@ const initFrontendDirectory = (config: SkibdiProjectConfig) => {
 
 			frontendPackageJson.dependencies = {
 				...frontendPackageJson.dependencies,
-				...elysiaBackendConfig.backend.dependencies,
+				...elysiaBackendConfig.frontend.dependencies,
 			};
 
 			writeFileSync(
 				frontendPackageJsonPath,
 				JSON.stringify(frontendPackageJson, null, 2),
 			);
-			copyDirTemplates("./templates/frontend/with-elysia", frontendDir);
+			copyDirTemplates("./templates/frontend/with-elysia", frontendDir, config);
+		});
+		if (errCopyingElysia) {
+			log.error(
+				`Failed to copy Elysia templates:- ${errCopyingElysia.message}`,
+			);
+		}
+		log.info("Elysia frontend templates copied successfully");
+	}
+	if (config.backend === "encore") {
+		const [, errCopyingElysia] = unwrapSync(() => {
+			const frontendPackageJsonPath = path.join(frontendDir, "package.json");
+			const frontendPackageJson = JSON.parse(
+				readFileSync(frontendPackageJsonPath, "utf-8"),
+			);
+
+			frontendPackageJson.dependencies = {
+				...frontendPackageJson.dependencies,
+				...encoreBackendConfig.frontend.dependencies,
+			};
+
+			writeFileSync(
+				frontendPackageJsonPath,
+				JSON.stringify(frontendPackageJson, null, 2),
+			);
+			copyDirTemplates("./templates/frontend/with-elysia", frontendDir, config);
 		});
 		if (errCopyingElysia) {
 			log.error(
@@ -306,7 +335,7 @@ const initbackendDirectory = (config: SkibdiProjectConfig) => {
 	const backendDir = path.join(projectPath, "apps", "backend");
 
 	if (backend === "elysia") {
-		copyDirTemplates("./templates/backend/with-elysia", backendDir);
+		copyDirTemplates("./templates/backend/with-elysia", backendDir, config);
 		const backendPackageJsonPath = path.join(backendDir, "package.json");
 		const backendPackageJson = JSON.parse(
 			readFileSync(backendPackageJsonPath, "utf-8"),
@@ -329,6 +358,31 @@ const initbackendDirectory = (config: SkibdiProjectConfig) => {
 			JSON.stringify(backendPackageJson, null, 2),
 		);
 		log.info("Elysia backend templates copied successfully");
+	}
+	if (backend === "encore") {
+		copyDirTemplates("./templates/backend/with-encore", backendDir, config);
+		const backendPackageJsonPath = path.join(backendDir, "package.json");
+		const backendPackageJson = JSON.parse(
+			readFileSync(backendPackageJsonPath, "utf-8"),
+		);
+
+		backendPackageJson.name = "backend";
+
+		backendPackageJson.dependencies = {
+			...backendPackageJson.dependencies,
+			...encoreBackendConfig.dependencies,
+		};
+
+		backendPackageJson.scripts = {
+			...backendPackageJson.scripts,
+			...encoreBackendConfig.scripts,
+		};
+
+		writeFileSync(
+			backendPackageJsonPath,
+			JSON.stringify(backendPackageJson, null, 2),
+		);
+		log.info("Encore backend templates copied successfully");
 	}
 };
 
@@ -375,11 +429,13 @@ const initBasicSetupForProject = (config: SkibdiProjectConfig) => {
 };
 
 intro(
-	`\n${figlet.textSync("Skibdi Stack", {
-		font: "Standard",
-		horizontalLayout: "fitted",
-		verticalLayout: "fitted",
-	})}`,
+	`\n${kleur.cyan(
+		figlet.textSync("Skibdi Stack", {
+			font: "Small",
+			horizontalLayout: "fitted",
+			verticalLayout: "fitted",
+		}),
+	)}`,
 );
 
 const projectName = await text({
@@ -505,14 +561,13 @@ if (isCancel(installDeps)) {
 	cancel("Operation cancelled");
 	process.exit(0);
 }
-// note(`
-//     Project Configuration Summary:
-//           📦 Project Name: ${projectName}
-//           📍 Location: ${getRelativePath(projectPath)}
-//           🔧 Backend: ${backend}
-//           🎨 Styling: ${styling}
-//           ✨ Features: ${features?.join(", ") || "None"}
-//         `);
+note(`
+📦 Project: ${projectName}
+📍 Location: ${getRelativePath(projectPath)}
+🔧 Backend: ${backend}
+🎨 Styling: ${styling}
+✨ Features: ${features?.join(", ") || "none"}
+`);
 
 const s = spinner();
 s.start("Creating project directory");
