@@ -20,7 +20,7 @@ const initFrontendDirectory = (config: SkibidiProjectConfig) => {
 	s.start("Initializing Svelte project");
 
 	const svelteInit = spawnSync(
-		"bun x",
+		"npx",
 		[
 			"--yes",
 			"sv",
