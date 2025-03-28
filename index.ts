@@ -28,7 +28,7 @@ import {
 	initStyling,
 } from "@lib/init";
 import initbackendDirectory from "@lib/init/backend";
-import { getRelativePath } from "@lib/utils";
+import { getRelativePath, isBunInstalled } from "@lib/utils";
 import kleur from "kleur";
 
 // Utility functions
@@ -104,6 +104,13 @@ intro(
 `.trimEnd(),
 	)}`,
 );
+
+// Check bun installation
+const isBunThere = isBunInstalled();
+if (!isBunThere) {
+	cancel("Bun is not installed. Please install it and try again.");
+	process.exit(1);
+}
 
 // Project configuration prompts
 const projectName = await text({

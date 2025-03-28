@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 /**
  * IMPORTS
  */
@@ -11,6 +12,17 @@ import {
 import { dirname, join, relative } from "node:path";
 import { unwrapSync } from "@arnavk-09/unwrap-go";
 import { depVersions } from "@lib/consts";
+
+/**
+ * Checks if Bun is installed by attempting to run 'bun --version'
+ */
+export const isBunInstalled = (): boolean => {
+	const result = spawnSync("bunx", ["--version"], {
+		stdio: "ignore",
+	});
+
+	return result.status === 0;
+};
 
 /**
  * Gets the version of a dependency from the depVersions object

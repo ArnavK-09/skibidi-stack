@@ -20,7 +20,7 @@ const initFrontendDirectory = (config: SkibidiProjectConfig) => {
 	s.start("Initializing Svelte project");
 
 	const svelteInit = spawnSync(
-		"npx",
+		"bun x",
 		[
 			"--yes",
 			"sv",
@@ -37,8 +37,7 @@ const initFrontendDirectory = (config: SkibidiProjectConfig) => {
 	);
 
 	if (svelteInit.error) {
-		s.stop("Failed to initialize Svelte project");
-		throw new Error("Failed to initialize Svelte project");
+		throw new Error(`Failed to initialize Svelte project ${svelteInit.error}`);
 	}
 
 	s.stop("Svelte project initialized successfully");
