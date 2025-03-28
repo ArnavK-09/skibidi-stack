@@ -1,7 +1,6 @@
 /**
  * IMPORTS
  */
-import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { log, spinner } from "@clack/prompts";
@@ -19,26 +18,7 @@ const initFrontendDirectory = (config: SkibidiProjectConfig) => {
 	const s = spinner();
 	s.start("Initializing Svelte project");
 
-	const svelteInit = spawnSync(
-		"npx",
-		[
-			"--yes",
-			"sv",
-			"create",
-			"--template",
-			"minimal",
-			"--types",
-			"ts",
-			"--no-add-ons",
-			"--no-install",
-			".",
-		],
-		{ cwd: frontendDir, stdio: "pipe" },
-	);
-
-	if (svelteInit.error) {
-		throw new Error(`Failed to initialize Svelte project ${svelteInit.error}`);
-	}
+	copyDirTemplates(getTemplatesPath("frontend/base"), frontendDir, config);
 
 	s.stop("Svelte project initialized successfully");
 
