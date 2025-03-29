@@ -1,3 +1,6 @@
+/**
+ * IMPORTS
+ */
 import {
 	existsSync,
 	mkdirSync,
@@ -6,9 +9,6 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-/**
- * IMPORTS
- */
 import { getTemplatesPath } from "@/";
 
 /**
@@ -38,12 +38,12 @@ const initGithubActions = (config: SkibidiProjectConfig) => {
 		if (entry.isFile()) {
 			const sourcePath = join(templateDir, entry.name);
 			if (
-				entry.name === "format-check.yml" &&
+				entry.name === "format-check.yml.eta" &&
 				!config.features.includes("prettier")
 			) {
 				continue;
 			}
-			const destPath = join(workflowsDir, entry.name);
+			const destPath = join(workflowsDir, entry.name.replace(".eta", ".yml"));
 			const content = readFileSync(sourcePath, "utf-8");
 			writeFileSync(destPath, content);
 		}
