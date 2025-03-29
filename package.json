@@ -1,6 +1,6 @@
 {
 	"name": "skibidi-stack",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"module": "index.ts",
 	"type": "module",
 	"author": "ArnavK-09 <arnavkaushal09@gmail.com>",
