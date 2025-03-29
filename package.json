@@ -1,6 +1,6 @@
 {
 	"name": "skibidi-stack",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"module": "index.ts",
 	"type": "module",
 	"author": "ArnavK-09 <arnavkaushal09@gmail.com>",
@@ -31,5 +31,5 @@
 	"dependencies": {
 		"@types/figlet": "^1.7.0"
 	},
-	"files": ["dist", "README.md", "templates/gh-actions"]
+	"files": ["dist", "README.md"]
 }

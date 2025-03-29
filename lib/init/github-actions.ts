@@ -38,12 +38,12 @@ const initGithubActions = (config: SkibidiProjectConfig) => {
 		if (entry.isFile()) {
 			const sourcePath = join(templateDir, entry.name);
 			if (
-				entry.name === "format-check.yml.eta" &&
+				entry.name.includes("format-check") &&
 				!config.features.includes("prettier")
 			) {
 				continue;
 			}
-			const destPath = join(workflowsDir, entry.name.replace(".eta", ".yml"));
+			const destPath = join(workflowsDir, entry.name.replace(".eta", ""));
 			const content = readFileSync(sourcePath, "utf-8");
 			writeFileSync(destPath, content);
 		}
