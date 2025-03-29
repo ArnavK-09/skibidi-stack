@@ -5,7 +5,7 @@
 	"type": "module",
 	"author": "ArnavK-09 <arnavkaushal09@gmail.com>",
 	"bin": {
-		"skibidi": "./dist/index.js"
+		"skibidi": "dist/index.js"
 	},
 	"devDependencies": {
 		"@arnavk-09/unwrap-go": "^0.1.1",
