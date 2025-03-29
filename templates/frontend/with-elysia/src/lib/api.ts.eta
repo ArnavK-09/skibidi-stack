@@ -1,7 +1,7 @@
 // Import treaty client builder from Elysia Eden
 import { treaty } from "@elysiajs/eden";
 // Import app type definition from server routes
-import { app } from "backend/src";
+import { app } from "backend";
 
 // Determine API origin based on environment
 // Use window.location.origin in browser, empty string in SSR
