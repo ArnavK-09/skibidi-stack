@@ -16,6 +16,12 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org/"
+
       - name: Install dependencies
         run: bun install
 
@@ -25,5 +31,7 @@ jobs:
       - name: Setup NPM auth
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
-      - name: Publish to NPM
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
